@@ -2,6 +2,10 @@ import pandas as pd
 import re
 import nltk
 from nltk.corpus import stopwords
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
 
 # load the IMDB dataset
 df = pd.read_csv('IMDB Dataset.csv')
@@ -40,3 +44,14 @@ df['processed_review'] = df['review'].apply(clean_text).apply(remove_stopwords)
 
 #convert sentiment labels to binary values
 df['sentiment_label'] = df['sentiment'].map({'positive': 1, 'negative': 0})
+
+#vectorize text data using TF-IDF using only top 5000 most important words
+vectorizer = TfidfVectorizer(max_features=5000)
+
+#convert all reviews to numbers
+X = vectorizer.fit_transform(df['processed_review'])
+y = df['sentiment_label']
+
+#split into train and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)   
+

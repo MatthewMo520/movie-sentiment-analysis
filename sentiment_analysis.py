@@ -5,8 +5,10 @@ from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.naive_bayes import MultinomialNB
+import matplotlib.pyplot as plt
+import numpy as np
 
 # load the IMDB dataset
 df = pd.read_csv('IMDB Dataset.csv')
@@ -65,6 +67,8 @@ model.fit(X_train, y_train)
 #make predictions on test set
 y_pred = model.predict(X_test)
 
+print('-'*50)
+
 #evaluate the accuracy of model
 accuracy = accuracy_score(y_test, y_pred)
 print("Logistic Regression Model")
@@ -109,3 +113,43 @@ else:
     print(f'The better model is Logistic Regression (+{(accuracy - nb_accuracy)*100:.2f}%)')
     best_model = model
     best_accuracy = accuracy
+
+print('-'*50)
+
+print("Confusion Matrix for Best Model:")
+
+#get confusion matrix for best model
+cm = confusion_matrix(y_test, best_model.predict(X_test))
+
+print(cm)
+print("Explanation of Confusion Matrix:")
+print(f'True Negatives (Correctly predicted negative reviews): {cm[0,0]}')
+print(f'False Positives (Incorrectly predicted positive reviews, predicted positive while negative): {cm[0,1]}')
+print(f'False Negatives (Incorrectly predicted negative reviews, predicted negative while positive): {cm[1,0]}')
+print(f'True Positives (Correctly predicted positive reviews): {cm[1,1]}')
+
+#visualize confusion matrix
+plt.figure(figsize=(8, 6))
+plt.imshow(cm, cmap='Blues')
+plt.title('Confusion Matrix - Logistic Regression' if best_model == model else 'Confusion Matrix - Naive Bayes')
+plt.colorbar()
+
+#add labels
+class_names = ['Negative', 'Positive']
+tick_marks = np.arange(len(class_names))
+plt.xticks(tick_marks, class_names)
+plt.yticks(tick_marks, class_names)
+
+#add numbers to cells
+for i in range(2):
+    for j in range(2):
+        plt.text(j, i, cm[i, j], ha='center', va = 'center', 
+                 color='white' if cm[i, j] > cm.max() / 2 else 'black',
+                 fontsize = 20)
+
+#add axis labels, save and show plot
+plt.ylabel('Actual')
+plt.xlabel('Predicted')
+plt.tight_layout()
+plt.savefig('confusion_matrix.png', dpi=300, bbox_inches='tight')
+plt.show()

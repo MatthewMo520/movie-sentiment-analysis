@@ -22,7 +22,21 @@ def clean_text(text):
     text = text.lower()
 
     #remove extra whitespace
-    text = " ".join(text.split())
+    text = ' '.join(text.split())
 
     return text
 
+#get English stopwords
+stop_words = set(stopwords.words('english'))
+
+#removing stop words from text/words that dont add meaning
+def remove_stopwords(text):
+    words = text.split()
+    filtered_words = [word for word in words if word not in stop_words]
+    return ' '.join(filtered_words)
+
+#apply cleaning and stopword removal to the dataset
+df['processed_review'] = df['review'].apply(clean_text).apply(remove_stopwords)
+
+#convert sentiment labels to binary values
+df['sentiment_label'] = df['sentiment'].map({'positive': 1, 'negative': 0})

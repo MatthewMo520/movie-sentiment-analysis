@@ -1,19 +1,28 @@
 import pandas as pd
+import re
+import nltk
+from nltk.corpus import stopwords
 
-# Load the IMDB dataset
+# load the IMDB dataset
 df = pd.read_csv('IMDB Dataset.csv')
 
-print("Example reviews:")
-print("positive review:")
-print(df[df['sentiment'] == 'positive']['review'].iloc[0])
+# download NLTK stopwords
+nltk.download('stopwords')
 
-print("-"*50)
+# clean and preprocess text data
+def clean_text(text):
 
-print("negative review:")
-print(df[df['sentiment'] == 'negative']['review'].iloc[0])
+    #remove HTML tags
+    text = re.sub(r'<.*?>', '', text)
 
-df['review_length'] = df['review'].apply(len)
-print("\nReview length statistics:")
-print(f"average review length: {df['review_length'].mean():.0f} characters")
-print(f"shortest review length: {df['review_length'].min()} characters")
-print(f"longest review length: {df['review_length'].max()} characters")
+    #remove special characters and numbers (only keep letters and spaces)
+    text = re.sub(r'[^a-zA-Z\s]', '', text)
+
+    #convert to lowercase
+    text = text.lower()
+
+    #remove extra whitespace
+    text = " ".join(text.split())
+
+    return text
+
